@@ -1,3 +1,7 @@
-*/build-uno/*
+*/build-*/*
 /Buildfiles/
 examples/*
+/libraries/
+*.hex
+*.bin
+/hardware/

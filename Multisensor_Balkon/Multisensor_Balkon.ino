@@ -38,11 +38,14 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    - light sensor on pin A0
  *    - dht22 temp and hum on pin 6
  *    - sds011 feinstaub on pin 2, 3
+ *  1.1:
+ *    - changed name to Multisensor_Balkon
+ +    - use MY_RADIO_RF24 instead if MY_RADIO_NRF24
  */
 
 // General settings
-#define SKETCH_NAME "NodeManager"
-#define SKETCH_VERSION "1.0"
+#define SKETCH_NAME "Multisensor_Balkon"
+#define SKETCH_VERSION "1.1"
 //#define MY_DEBUG
 //#define MY_NODE_ID 99
 

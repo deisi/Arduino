@@ -7,8 +7,8 @@ ARDUINO_LIBS +=  $(notdir $(wildcard $(USER_LIB_PATH)/*))
 ARDUINO_LIBS +=  SPI Wire SoftwareSerial
 
 # Even though I use mostly Mini, nano seems to be correct
-BOARD_TAG = nano
-BOARD_SUB = atmega328old
+BOARD_TAG = pro
+BOARD_SUB = 16MHzatmega328
 #MONITOR_PORT = /dev/ttyUSB0
 
 

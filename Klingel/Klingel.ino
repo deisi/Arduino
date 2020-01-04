@@ -32,17 +32,21 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
 /*
  *  Changelog.
  *  1.0:
- *    flashed on 1.1.2020
+ *    flashed on 4.1.2020
  *    - Debugging on
- *    - bmp180 temp ans pressure included but broken
- *    - light sensor on pin A0
- *    - dht22 temp and hum on pin 6
- *    - sds011 feinstaub on pin 2, 3
+ *    - Uses NodeManager
+ *    - Use InterruptHook to cach interrupt event and turn on Klingel for 5s
+ *  2.0:
+ *    flashed on 4.1.2020
+ *    - Debugging off
+ *    - Splashscreen on
+ *    - The button sensor is called button
+ *    - Bell sensor is now called bell
  */
 
 // General settings
 #define SKETCH_NAME "Klingel"
-#define SKETCH_VERSION "1.0"
+#define SKETCH_VERSION "2.0"
 #define MY_DEBUG
 //#define MY_NODE_ID 99
 
@@ -77,7 +81,7 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
 // Advanced settings
 #define MY_BAUD_RATE 9600
 //#define MY_SMART_SLEEP_WAIT_DURATION_MS 500
-#define MY_SPLASH_SCREEN_DISABLED
+//#define MY_SPLASH_SCREEN_DISABLED
 //#define MY_DISABLE_RAM_ROUTING_TABLE_FEATURE
 //#define MY_SIGNAL_REPORT_ENABLED
 
@@ -85,7 +89,7 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  * NodeManager configuration
  */
 
-#define NODEMANAGER_DEBUG ON
+#define NODEMANAGER_DEBUG OFF
 #define NODEMANAGER_INTERRUPTS ON
 #define NODEMANAGER_SLEEP OFF
 #define NODEMANAGER_RECEIVE ON
@@ -108,33 +112,26 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  * Add your sensors
  */
 
-//#include <sensors/SensorConfiguration.h>
-//SensorConfiguration configuration;
-
 //#include <sensors/SensorSignal.h>
 //SensorSignal signal;
 
-
-// This is the pin, the button at the door bell is attached to
-#include <sensors/SensorDoor.h>
-SensorDoor bell(3);
+// This is the pin, the button at the door button is attached to
+#include <sensors/SensorInterrupt.h>
+SensorInterrupt button(3);
 
 // This is the pin, the sound making tool is attached to
 #include <sensors/SensorDigitalOutput.h>
-SensorDigitalOutput digitalOut(6);
+SensorDigitalOutput bell(6);
 
 /***********************************
  * Main Sketch
  */
 
 // function to set digital out status
-void setDigitalOutTrue(Sensor* sensor){
-  Serial.println("Set digital Out: Child Value");
-  Serial.println(bell.children.get()->getValueInt());
-  if (bell.children.get()->getValueInt()) {
-    digitalOut.setStatus(ON);
+void setBellTrue(Sensor* sensor){
+  if (button.children.get()->getValueInt()) {
+    bell.setStatus(ON);
   }
-  bell.children.get()->sendValue();
 }
 
 // before
@@ -144,12 +141,14 @@ void before() {
    * Configure your sensors
    */
 
-  bell.setInvertValueToReport(true);
-  bell.children.get()->setDescription("KLINGEL");
-  bell.setInterruptHook(&setDigitalOutTrue);
+  button.setInvertValueToReport(true);
+  button.children.get()->setDescription("KNOPF");
+  button.setInterruptMode(FALLING);
+  button.setInterruptHook(&setBellTrue);
 
-  digitalOut.setPulseWidth(5000);
-  digitalOut.setSafeguard(1);
+  bell.setPulseWidth(5000);
+  bell.children.get()->setDescription("KLINGEL");
+  bell.setSafeguard(1);
 
   // EXAMPLES:
   // report measures of every attached sensors every 10 seconds
@@ -191,10 +190,6 @@ void setup() {
 void loop() {
   // call NodeManager loop routine
   nodeManager.loop();
-  //if (interrupt.children.get(1)->getValueInt() == HIGH)
-  //  digitalOut.setStatus(ON);
-  //delay(5000);
-  //digitalOut.setStatus(OFF);
 }
 
 #if NODEMANAGER_RECEIVE == ON

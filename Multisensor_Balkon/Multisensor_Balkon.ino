@@ -48,11 +48,16 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    - Flashed on 4.1.20
  *    - No Debugging
  *    - Added Splashscreen
+ *  3.0:
+ *    flashed 5.1.20
+ *    - Add bme280
+ *    - Configured individual report deltas
+ *    - OTA_CONFIG must be off. Over 85% usage, the node doesn't work
  */
 
 // General settings
 #define SKETCH_NAME "Multisensor_Balkon"
-#define SKETCH_VERSION "2.0"
+#define SKETCH_VERSION "3.0"
 //#define MY_DEBUG
 //#define MY_NODE_ID 99
 
@@ -107,7 +112,7 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
 #define NODEMANAGER_RTC OFF
 #define NODEMANAGER_SD OFF
 #define NODEMANAGER_HOOKING OFF
-#define NODEMANAGER_OTA_CONFIGURATION ON
+#define NODEMANAGER_OTA_CONFIGURATION OFF
 #define NODEMANAGER_SERIAL_INPUT OFF
 
 // import NodeManager library (a nodeManager object will be then made available)
@@ -118,20 +123,17 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  * Add your sensors
  */
 
-//#include <sensors/SensorSignal.h>
-//SensorSignal signal;
-
-#include <sensors/SensorLDR.h>
-SensorLDR ldr(A0);
-
-#include <sensors/SensorDHT22.h>
-SensorDHT22 dht22(6);
-
-//#include <sensors/SensorBMP180.h>
-//SensorBMP180 bmp180;
-
 #include <sensors/SensorSDS011.h>
 SensorSDS011 sds011(2,3);
+
+#include <sensors/SensorBME280.h>
+SensorBME280 bme280;
+
+#include <sensors/SensorBH1750.h>
+SensorBH1750 bh1750;
+
+//#include <sensors/SensorSignal.h>
+//SensorSignal signal;
 
 
 /***********************************
@@ -144,20 +146,20 @@ void before() {
   /***********************************
    * Configure your sensors
    */
-  // Light report threshold
-  ldr.children.get()->setValueDelta(5);
-  ldr.children.get()->setDescription("HELLIGKEIT");
-
-  // Temperature report threshold
-  dht22.children.get(1)->setValueDelta(0.2);
-  dht22.children.get(1)->setDescription("TEMPERATUR");
-  // Humidity report threshold
-  dht22.children.get(2)->setValueDelta(5);
-  dht22.children.get(2)->setDescription("LUFTFEUCHTIGKEIT");
-
   sds011.setReportIntervalMinutes(10);
   sds011.children.get(1)->setDescription("FEINSTAUB 10");
   sds011.children.get(2)->setDescription("FEINSTAUB 2.5");
+
+  bme280.children.get(1)->setDescription("TEMPERATUR");
+  bme280.children.get(1)->setValueDelta(0.1);
+  bme280.children.get(2)->setDescription("LUFTFEUCHTIGKEIT");
+  bme280.children.get(2)->setValueDelta(1);
+  bme280.children.get(3)->setDescription("LUFTDRUCK");
+  bme280.children.get(3)->setValueDelta(10);
+  bme280.children.get(4)->setDescription("VORHERSAGE");
+
+  bh1750.children.get()->setDescription("HELLIGKEIT");
+  bh1750.children.get()->setValueDelta(4);
 
   // EXAMPLES:
   // report measures of every attached sensors every 10 seconds

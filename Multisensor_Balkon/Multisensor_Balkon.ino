@@ -40,12 +40,19 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    - sds011 feinstaub on pin 2, 3
  *  1.1:
  *    - changed name to Multisensor_Balkon
- +    - use MY_RADIO_RF24 instead if MY_RADIO_NRF24
+ *    - use MY_RADIO_RF24 instead if MY_RADIO_NRF24
+ *  1.2:
+ *    - Use 10 min Report time for SDS
+ *    - Use 1 min report time but minimal differences for sending changes
+ *  2.0:
+ *    - Flashed on 4.1.20
+ *    - No Debugging
+ *    - Added Splashscreen
  */
 
 // General settings
 #define SKETCH_NAME "Multisensor_Balkon"
-#define SKETCH_VERSION "1.1"
+#define SKETCH_VERSION "2.0"
 //#define MY_DEBUG
 //#define MY_NODE_ID 99
 
@@ -80,7 +87,7 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
 // Advanced settings
 #define MY_BAUD_RATE 9600
 //#define MY_SMART_SLEEP_WAIT_DURATION_MS 500
-#define MY_SPLASH_SCREEN_DISABLED
+//#define MY_SPLASH_SCREEN_DISABLED
 //#define MY_DISABLE_RAM_ROUTING_TABLE_FEATURE
 //#define MY_SIGNAL_REPORT_ENABLED
 
@@ -88,13 +95,13 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  * NodeManager configuration
  */
 
-#define NODEMANAGER_DEBUG ON
-#define NODEMANAGER_INTERRUPTS ON
+#define NODEMANAGER_DEBUG OFF
+#define NODEMANAGER_INTERRUPTS OFF
 #define NODEMANAGER_SLEEP OFF
 #define NODEMANAGER_RECEIVE ON
 #define NODEMANAGER_DEBUG_VERBOSE OFF
 #define NODEMANAGER_POWER_MANAGER OFF
-#define NODEMANAGER_CONDITIONAL_REPORT OFF
+#define NODEMANAGER_CONDITIONAL_REPORT ON
 #define NODEMANAGER_EEPROM OFF
 #define NODEMANAGER_TIME OFF
 #define NODEMANAGER_RTC OFF
@@ -111,9 +118,6 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  * Add your sensors
  */
 
-//#include <sensors/SensorConfiguration.h>
-//SensorConfiguration configuration;
-
 //#include <sensors/SensorSignal.h>
 //SensorSignal signal;
 
@@ -123,8 +127,8 @@ SensorLDR ldr(A0);
 #include <sensors/SensorDHT22.h>
 SensorDHT22 dht22(6);
 
-#include <sensors/SensorBMP180.h>
-SensorBMP180 bmp180;
+//#include <sensors/SensorBMP180.h>
+//SensorBMP180 bmp180;
 
 #include <sensors/SensorSDS011.h>
 SensorSDS011 sds011(2,3);
@@ -140,12 +144,26 @@ void before() {
   /***********************************
    * Configure your sensors
    */
+  // Light report threshold
+  ldr.children.get()->setValueDelta(5);
+  ldr.children.get()->setDescription("HELLIGKEIT");
+
+  // Temperature report threshold
+  dht22.children.get(1)->setValueDelta(0.2);
+  dht22.children.get(1)->setDescription("TEMPERATUR");
+  // Humidity report threshold
+  dht22.children.get(2)->setValueDelta(5);
+  dht22.children.get(2)->setDescription("LUFTFEUCHTIGKEIT");
+
+  sds011.setReportIntervalMinutes(10);
+  sds011.children.get(1)->setDescription("FEINSTAUB 10");
+  sds011.children.get(2)->setDescription("FEINSTAUB 2.5");
 
   // EXAMPLES:
   // report measures of every attached sensors every 10 seconds
   //nodeManager.setReportIntervalSeconds(10);
   // report measures of every attached sensors every 10 minutes
-  nodeManager.setReportIntervalMinutes(2);
+  nodeManager.setReportIntervalMinutes(1);
   // set the node to sleep in 30 seconds cycles
   //nodeManager.setSleepSeconds(30);
   // set the node to sleep in 5 minutes cycles

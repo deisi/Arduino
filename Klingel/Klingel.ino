@@ -1,109 +1,214 @@
-/**
- * The MySensors Arduino library handles the wireless radio link and protocol
- * between your home built sensors/actuators and HA controller of choice.
- * The sensors forms a self healing radio network with optional repeaters. Each
- * repeater and gateway builds a routing tables in EEPROM which keeps track of the
- * network topology allowing messages to be routed to nodes.
- *
- * Created by Henrik Ekblad <henrik.ekblad@mysensors.org>
- * Copyright (C) 2013-2015 Sensnology AB
- * Full contributor list: https://github.com/mysensors/Arduino/graphs/contributors
- *
- * Documentation: http://www.mysensors.org
- * Support Forum: http://forum.mysensors.org
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- *******************************
- *
- * DESCRIPTION
- *
- * Interrupt driven binary switch example with dual interrupts
- * Author: Patrick 'Anticimex' Fallberg
- * Connect one button or door/window reed switch between
- * digitial I/O pin 3 (BUTTON_PIN below) and GND and the other
- * one in similar fashion on digital I/O pin 2.
- * This example is designed to fit Arduino Nano/Pro Mini
- *
+/*
+* The MySensors Arduino library handles the wireless radio link and protocol
+* between your home built sensors/actuators and HA controller of choice.
+* The sensors forms a self healing radio network with optional repeaters. Each
+* repeater and gateway builds a routing tables in EEPROM which keeps track of the
+* network topology allowing messages to be routed to nodes.
+*
+* Created by Henrik Ekblad <henrik.ekblad@mysensors.org>
+* Copyright (C) 2013-2017 Sensnology AB
+* Full contributor list: https://github.com/mysensors/Arduino/graphs/contributors
+*
+* Documentation: http://www.mysensors.org
+* Support Forum: http://forum.mysensors.org
+*
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* version 2 as published by the Free Software Foundation.
+*/
+
+/**************************
+Template
+
+This sketch can be used as a template since containing the most relevant MySensors library configuration settings,
+NodeManager's settings, all its the supported sensors commented out and a sketch structure fully functional to operate with
+NodeManager. Just uncomment the settings you need and the sensors you want to add and configure the sensors in before()
+*/
+
+/**********************************
+ * MySensors node configuration
  */
 
+/*
+ *  Changelog.
+ *  1.0:
+ *    flashed on 1.1.2020
+ *    - Debugging on
+ *    - bmp180 temp ans pressure included but broken
+ *    - light sensor on pin A0
+ *    - dht22 temp and hum on pin 6
+ *    - sds011 feinstaub on pin 2, 3
+ */
 
-// Enable debug prints to serial monitor
-#define MY_DEBUG
-
-// Enable and select radio type attached
-#define MY_RADIO_NRF24
-
-// Enable Signing
-#define MY_SIGNING_REQUEST_SIGNATURES
-
-#define MY_NODE_ID 1
-
-#include <MySensors.h>
-
+// General settings
 #define SKETCH_NAME "Klingel"
-#define SKETCH_MAJOR_VER "1"
-#define SKETCH_MINOR_VER "0"
+#define SKETCH_VERSION "1.0"
+#define MY_DEBUG
+//#define MY_NODE_ID 99
 
-#define PRIMARY_CHILD_ID 1
+// NRF24 radio settings
+#define MY_RADIO_RF24
+//#define MY_RF24_ENABLE_ENCRYPTION
+//#define MY_RF24_CHANNEL 125
+//#define MY_RF24_PA_LEVEL RF24_PA_HIGH
+//#define MY_DEBUG_VERBOSE_RF24
+//#define MY_RF24_DATARATE RF24_250KBPS
 
-#define BUTTON_PIN 3   // Arduino Digital I/O pin for button/reed switch
-#define KLINGEL_PIN 6 // Arduino Digital I/O pin for button/write switch
+// Message signing settings
+//#define MY_SIGNING_SOFT
+//#define MY_SIGNING_SOFT_RANDOMSEED_PIN 7
+//#define MY_SIGNING_REQUEST_SIGNATURES
+//#define MY_SIGNING_ATSHA204
+//#define MY_SIGNING_ATSHA204_PIN 4
+//#define MY_SIGNING_REQUEST_SIGNATURES
 
-#if (BUTTON_PIN == KLINGEL_PIN)
-#error BUTTON_PIN and BUTTON_PIN2 cannot be the same
+// OTA Firmware update settings
+//#define MY_OTA_FIRMWARE_FEATURE
+//#define OTA_WAIT_PERIOD 300
+//#define FIRMWARE_MAX_REQUESTS 2
+//#define MY_OTA_RETRY 2
+
+// OTA debug output
+//#define MY_DEBUG_OTA (0)
+//#define MY_OTA_LOG_SENDER_FEATURE
+//#define MY_OTA_LOG_RECEIVER_FEATURE
+//#define MY_DEBUG_OTA_DISABLE_ACK
+
+// Advanced settings
+#define MY_BAUD_RATE 9600
+//#define MY_SMART_SLEEP_WAIT_DURATION_MS 500
+#define MY_SPLASH_SCREEN_DISABLED
+//#define MY_DISABLE_RAM_ROUTING_TABLE_FEATURE
+//#define MY_SIGNAL_REPORT_ENABLED
+
+/***********************************
+ * NodeManager configuration
+ */
+
+#define NODEMANAGER_DEBUG ON
+#define NODEMANAGER_INTERRUPTS ON
+#define NODEMANAGER_SLEEP OFF
+#define NODEMANAGER_RECEIVE ON
+#define NODEMANAGER_DEBUG_VERBOSE OFF
+#define NODEMANAGER_POWER_MANAGER OFF
+#define NODEMANAGER_CONDITIONAL_REPORT OFF
+#define NODEMANAGER_EEPROM OFF
+#define NODEMANAGER_TIME OFF
+#define NODEMANAGER_RTC OFF
+#define NODEMANAGER_SD OFF
+#define NODEMANAGER_HOOKING ON
+#define NODEMANAGER_OTA_CONFIGURATION ON
+#define NODEMANAGER_SERIAL_INPUT OFF
+
+// import NodeManager library (a nodeManager object will be then made available)
+#include <MySensors_NodeManager.h>
+
+
+/***********************************
+ * Add your sensors
+ */
+
+//#include <sensors/SensorConfiguration.h>
+//SensorConfiguration configuration;
+
+//#include <sensors/SensorSignal.h>
+//SensorSignal signal;
+
+
+// This is the pin, the button at the door bell is attached to
+#include <sensors/SensorDoor.h>
+SensorDoor bell(3);
+
+// This is the pin, the sound making tool is attached to
+#include <sensors/SensorDigitalOutput.h>
+SensorDigitalOutput digitalOut(6);
+
+/***********************************
+ * Main Sketch
+ */
+
+// function to set digital out status
+void setDigitalOutTrue(Sensor* sensor){
+  Serial.println("Set digital Out: Child Value");
+  Serial.println(bell.children.get()->getValueInt());
+  if (bell.children.get()->getValueInt()) {
+    digitalOut.setStatus(ON);
+  }
+  bell.children.get()->sendValue();
+}
+
+// before
+void before() {
+
+  /***********************************
+   * Configure your sensors
+   */
+
+  bell.setInvertValueToReport(true);
+  bell.children.get()->setDescription("KLINGEL");
+  bell.setInterruptHook(&setDigitalOutTrue);
+
+  digitalOut.setPulseWidth(5000);
+  digitalOut.setSafeguard(1);
+
+  // EXAMPLES:
+  // report measures of every attached sensors every 10 seconds
+  //nodeManager.setReportIntervalSeconds(10);
+  // report measures of every attached sensors every 10 minutes
+  nodeManager.setReportIntervalMinutes(1);
+  // set the node to sleep in 30 seconds cycles
+  //nodeManager.setSleepSeconds(30);
+  // set the node to sleep in 5 minutes cycles
+  //nodeManager.setSleepMinutes(5);
+  // report battery level every 10 minutes
+  //battery.setReportIntervalMinutes(10);
+  // set an offset to -1 to a thermistor sensor
+  //thermistor.setOffset(-1);
+  // change the id of a the first child of a sht21 sensor
+  //sht21.children.get(1)->setChildId(5);
+  // report only when the analog value is above 40%
+  //analog.children.get(1)->setMinThreshold(40);
+  // power all the nodes through dedicated pins
+  //nodeManager.setPowerManager(power);
+  // call NodeManager before routine
+  nodeManager.before();
+}
+
+// presentation
+void presentation() {
+  // call NodeManager presentation routine
+  nodeManager.presentation();
+}
+
+// setup
+void setup() {
+  // call NodeManager setup routine
+  nodeManager.setup();
+
+}
+
+// loop
+void loop() {
+  // call NodeManager loop routine
+  nodeManager.loop();
+  //if (interrupt.children.get(1)->getValueInt() == HIGH)
+  //  digitalOut.setStatus(ON);
+  //delay(5000);
+  //digitalOut.setStatus(OFF);
+}
+
+#if NODEMANAGER_RECEIVE == ON
+// receive
+void receive(const MyMessage &message) {
+  // call NodeManager receive routine
+  nodeManager.receive(message);
+}
 #endif
 
-// Change to V_LIGHT if you use S_LIGHT in presentation below
-MyMessage msg(PRIMARY_CHILD_ID, V_TRIPPED);
-
-void setup()
-{
-	// Setup the buttons
-	pinMode(BUTTON_PIN, INPUT);
-  pinMode(KLINGEL_PIN, OUTPUT);
-
-
-	// Activate internal pull-ups
-	digitalWrite(BUTTON_PIN, HIGH);
+#if NODEMANAGER_TIME == ON
+// receiveTime
+void receiveTime(unsigned long ts) {
+  // call NodeManager receiveTime routine
+  nodeManager.receiveTime(ts);
 }
-
-void presentation()
-{
-	// Send the sketch version information to the gateway and Controller
-	sendSketchInfo(SKETCH_NAME, SKETCH_MAJOR_VER "." SKETCH_MINOR_VER);
-
-	// Register binary input sensor to sensor_node (they will be created as child devices)
-	// You can use S_DOOR, S_MOTION or S_LIGHT here depending on your usage.
-	// If S_LIGHT is used, remember to update variable type you send in. See "msg" above.
-	present(PRIMARY_CHILD_ID, S_DOOR);
-
-}
-
-// Loop will iterate on changes on the BUTTON_PINs
-void loop()
-{
-	uint8_t value;
-
-	value = digitalRead(BUTTON_PIN);
-
-	if (value == LOW) {
-		// Value has changed from last transmission, send the updated value
-	  send(msg.set(1));
-    digitalWrite(KLINGEL_PIN, HIGH);
-    Serial.print("Button Pressed\n");
-    delay(5000);
-    send(msg.set(0));
-    digitalWrite(KLINGEL_PIN, LOW);
-
-
-	} else {
-    digitalWrite(KLINGEL_PIN, LOW);
-	}
-
-	// Sleep until something happens with the sensor
-	sleep(BUTTON_PIN-2, CHANGE, 0);
-
-}
+#endif

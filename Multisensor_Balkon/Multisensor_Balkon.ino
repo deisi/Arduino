@@ -153,13 +153,13 @@ void before() {
   bme280.children.get(1)->setDescription("TEMPERATUR");
   bme280.children.get(1)->setValueDelta(0.1);
   bme280.children.get(2)->setDescription("LUFTFEUCHTIGKEIT");
-  bme280.children.get(2)->setValueDelta(1);
+  bme280.children.get(2)->setValueDelta(0.1);
   bme280.children.get(3)->setDescription("LUFTDRUCK");
-  bme280.children.get(3)->setValueDelta(10);
+  bme280.children.get(3)->setValueDelta(0.1);
   bme280.children.get(4)->setDescription("VORHERSAGE");
 
   bh1750.children.get()->setDescription("HELLIGKEIT");
-  bh1750.children.get()->setValueDelta(4);
+  bh1750.children.get()->setValueDelta(1);
 
   // EXAMPLES:
   // report measures of every attached sensors every 10 seconds

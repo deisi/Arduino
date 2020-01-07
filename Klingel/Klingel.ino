@@ -42,12 +42,17 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    - Splashscreen on
  *    - The button sensor is called button
  *    - Bell sensor is now called bell
+ *  3.0:
+ *    flashed 7.1.20
+ *    - Added BME280 and BH1750
+ *    - Removed buggy conditional reporting (might be conflict with interrupt)
+ *    - Set reporting intervall to 10min
  */
 
 // General settings
 #define SKETCH_NAME "Klingel"
-#define SKETCH_VERSION "2.0"
-#define MY_DEBUG
+#define SKETCH_VERSION "3.0"
+//#define MY_DEBUG
 //#define MY_NODE_ID 99
 
 // NRF24 radio settings
@@ -107,13 +112,9 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
 // import NodeManager library (a nodeManager object will be then made available)
 #include <MySensors_NodeManager.h>
 
-
 /***********************************
  * Add your sensors
  */
-
-//#include <sensors/SensorSignal.h>
-//SensorSignal signal;
 
 // This is the pin, the button at the door button is attached to
 #include <sensors/SensorInterrupt.h>
@@ -122,6 +123,12 @@ SensorInterrupt button(3);
 // This is the pin, the sound making tool is attached to
 #include <sensors/SensorDigitalOutput.h>
 SensorDigitalOutput bell(6);
+
+#include <sensors/SensorBME280.h>
+SensorBME280 bme280;
+
+#include <sensors/SensorBH1750.h>
+SensorBH1750 bh1750;
 
 /***********************************
  * Main Sketch
@@ -150,11 +157,21 @@ void before() {
   bell.children.get()->setDescription("KLINGEL");
   bell.setSafeguard(1);
 
+  bme280.children.get(1)->setDescription("TEMPERATUR");
+  //bme280.children.get(1)->setValueDelta(0.1);
+  bme280.children.get(2)->setDescription("LUFTFEUCHTIGKEIT");
+  //bme280.children.get(2)->setValueDelta(0.1);
+  bme280.children.get(3)->setDescription("LUFTDRUCK");
+  //bme280.children.get(3)->setValueDelta(0.1);
+
+  bh1750.children.get()->setDescription("HELLIGKEIT");
+  //bh1750.children.get()->setValueDelta(1);
+
   // EXAMPLES:
   // report measures of every attached sensors every 10 seconds
   //nodeManager.setReportIntervalSeconds(10);
   // report measures of every attached sensors every 10 minutes
-  nodeManager.setReportIntervalMinutes(1);
+  nodeManager.setReportIntervalMinutes(10);
   // set the node to sleep in 30 seconds cycles
   //nodeManager.setSleepSeconds(30);
   // set the node to sleep in 5 minutes cycles

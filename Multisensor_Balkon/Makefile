@@ -11,5 +11,9 @@ BOARD_TAG = pro
 BOARD_SUB = 16MHzatmega328
 #MONITOR_PORT = /dev/ttyUSB0
 
+# Monitor commands
+MONITOR_CMD = picocom
+MONITOR_PARAMS = --imap lfcrlf
+
 
 include $(ARDUINO)/Arduino.mk

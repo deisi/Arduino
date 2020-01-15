@@ -46,12 +46,15 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    flashed 7.1.20
  *    - Added BME280 and BH1750
  *    - Removed buggy conditional reporting (might be conflict with interrupt)
- *    - Set reporting intervall to 10min
+ *    - Set reporting interval to 10min
+ *  3.1:
+ *    flashed 15.1.20
+ *    - removed safeguard as it as causing a second ring of the bell
  */
 
 // General settings
 #define SKETCH_NAME "Klingel"
-#define SKETCH_VERSION "3.0"
+#define SKETCH_VERSION "3.1"
 //#define MY_DEBUG
 //#define MY_NODE_ID 99
 
@@ -155,7 +158,6 @@ void before() {
 
   bell.setPulseWidth(5000);
   bell.children.get()->setDescription("KLINGEL");
-  bell.setSafeguard(1);
 
   bme280.children.get(1)->setDescription("TEMPERATUR");
   //bme280.children.get(1)->setValueDelta(0.1);

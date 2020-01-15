@@ -60,7 +60,7 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
 
 // General settings
 #define SKETCH_NAME "Multisensor_Balkon"
-#define SKETCH_VERSION "3.0"
+#define SKETCH_VERSION "3.1"
 //#define MY_DEBUG
 //#define MY_NODE_ID 99
 

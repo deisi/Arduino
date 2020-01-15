@@ -53,6 +53,9 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    - Add bme280
  *    - Configured individual report deltas
  *    - OTA_CONFIG must be off. Over 85% usage, the node doesn't work
+ *  3.1:
+ *    flashed 15.7.20. Changed arduino
+ *    - Turned on debugging
  */
 
 // General settings
@@ -100,7 +103,7 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  * NodeManager configuration
  */
 
-#define NODEMANAGER_DEBUG OFF
+#define NODEMANAGER_DEBUG ON
 #define NODEMANAGER_INTERRUPTS OFF
 #define NODEMANAGER_SLEEP OFF
 #define NODEMANAGER_RECEIVE ON

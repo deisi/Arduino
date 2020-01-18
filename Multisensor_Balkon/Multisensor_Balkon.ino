@@ -54,13 +54,21 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    - Configured individual report deltas
  *    - OTA_CONFIG must be off. Over 85% usage, the node doesn't work
  *  3.1:
- *    flashed 15.7.20. Changed arduino
+ *    flashed 15.1.20. Changed arduino
  *    - Turned on debugging
+ *  3.2:
+ *    flashed 15.1.20. Changed arduino
+ *    - Turned debugging off
+ *  3.3:
+ *    flashed 18.1.20
+ *    - Turn of conditional reports. I think they just don't work
+ *    - Report every 10 min and brightness every 2
+ *    - Turned on OTA config
  */
 
 // General settings
 #define SKETCH_NAME "Multisensor_Balkon"
-#define SKETCH_VERSION "3.1"
+#define SKETCH_VERSION "3.3"
 //#define MY_DEBUG
 //#define MY_NODE_ID 99
 
@@ -103,19 +111,19 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  * NodeManager configuration
  */
 
-#define NODEMANAGER_DEBUG ON
+#define NODEMANAGER_DEBUG OFF
 #define NODEMANAGER_INTERRUPTS OFF
 #define NODEMANAGER_SLEEP OFF
 #define NODEMANAGER_RECEIVE ON
 #define NODEMANAGER_DEBUG_VERBOSE OFF
 #define NODEMANAGER_POWER_MANAGER OFF
-#define NODEMANAGER_CONDITIONAL_REPORT ON
+#define NODEMANAGER_CONDITIONAL_REPORT OFF
 #define NODEMANAGER_EEPROM OFF
 #define NODEMANAGER_TIME OFF
 #define NODEMANAGER_RTC OFF
 #define NODEMANAGER_SD OFF
 #define NODEMANAGER_HOOKING OFF
-#define NODEMANAGER_OTA_CONFIGURATION OFF
+#define NODEMANAGER_OTA_CONFIGURATION ON
 #define NODEMANAGER_SERIAL_INPUT OFF
 
 // import NodeManager library (a nodeManager object will be then made available)
@@ -149,26 +157,26 @@ void before() {
   /***********************************
    * Configure your sensors
    */
-  sds011.setReportIntervalMinutes(10);
   sds011.children.get(1)->setDescription("FEINSTAUB 10");
   sds011.children.get(2)->setDescription("FEINSTAUB 2.5");
 
   bme280.children.get(1)->setDescription("TEMPERATUR");
-  bme280.children.get(1)->setValueDelta(0.1);
+  //bme280.children.get(1)->setValueDelta(0.1);
   bme280.children.get(2)->setDescription("LUFTFEUCHTIGKEIT");
-  bme280.children.get(2)->setValueDelta(0.1);
+  //bme280.children.get(2)->setValueDelta(0.1);
   bme280.children.get(3)->setDescription("LUFTDRUCK");
-  bme280.children.get(3)->setValueDelta(0.1);
+  //bme280.children.get(3)->setValueDelta(0.1);
   bme280.children.get(4)->setDescription("VORHERSAGE");
 
+  sds011.setReportIntervalMinutes(2);
   bh1750.children.get()->setDescription("HELLIGKEIT");
-  bh1750.children.get()->setValueDelta(1);
+  //bh1750.children.get()->setValueDelta(1);
 
   // EXAMPLES:
   // report measures of every attached sensors every 10 seconds
   //nodeManager.setReportIntervalSeconds(10);
   // report measures of every attached sensors every 10 minutes
-  nodeManager.setReportIntervalMinutes(1);
+  nodeManager.setReportIntervalMinutes(10);
   // set the node to sleep in 30 seconds cycles
   //nodeManager.setSleepSeconds(30);
   // set the node to sleep in 5 minutes cycles

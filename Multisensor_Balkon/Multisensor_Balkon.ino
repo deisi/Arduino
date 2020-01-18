@@ -64,11 +64,13 @@ NodeManager. Just uncomment the settings you need and the sensors you want to ad
  *    - Turn of conditional reports. I think they just don't work
  *    - Report every 10 min and brightness every 2
  *    - Turned on OTA config
+ *  3.4
+ *    - fix time of helligkeits sensor
  */
 
 // General settings
 #define SKETCH_NAME "Multisensor_Balkon"
-#define SKETCH_VERSION "3.3"
+#define SKETCH_VERSION "3.4"
 //#define MY_DEBUG
 //#define MY_NODE_ID 99
 
@@ -143,10 +145,6 @@ SensorBME280 bme280;
 #include <sensors/SensorBH1750.h>
 SensorBH1750 bh1750;
 
-//#include <sensors/SensorSignal.h>
-//SensorSignal signal;
-
-
 /***********************************
  * Main Sketch
  */
@@ -161,16 +159,12 @@ void before() {
   sds011.children.get(2)->setDescription("FEINSTAUB 2.5");
 
   bme280.children.get(1)->setDescription("TEMPERATUR");
-  //bme280.children.get(1)->setValueDelta(0.1);
   bme280.children.get(2)->setDescription("LUFTFEUCHTIGKEIT");
-  //bme280.children.get(2)->setValueDelta(0.1);
   bme280.children.get(3)->setDescription("LUFTDRUCK");
-  //bme280.children.get(3)->setValueDelta(0.1);
   bme280.children.get(4)->setDescription("VORHERSAGE");
 
-  sds011.setReportIntervalMinutes(2);
+  bh1750.setReportIntervalMinutes(2);
   bh1750.children.get()->setDescription("HELLIGKEIT");
-  //bh1750.children.get()->setValueDelta(1);
 
   // EXAMPLES:
   // report measures of every attached sensors every 10 seconds
